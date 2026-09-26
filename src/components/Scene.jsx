@@ -3,8 +3,6 @@ export default function Scene({ active }) {
     <div className={`scene ${active ? 'scene--active' : ''}`} aria-hidden="true">
       <div className="scene__image scene__image--exterior" />
       <div className="scene__image scene__image--interior" />
-      {/* corridor: in DOM for future use but background-image removed from CSS to avoid the ~3MB fetch */}
-      <div className="scene__image scene__image--corridor" />
 
       <div className="scene__light scene__light--one" />
       <div className="scene__light scene__light--two" />

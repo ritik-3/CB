@@ -38,8 +38,6 @@ button { color: inherit; }
 }
 .scene__image--exterior { background-image: url('/assets/reference-1.png'); opacity: .96; transform: scale(1.02); }
 .scene__image--interior { background-image: url('/assets/reference-2.png'); opacity: 0; transform: scale(1.07); filter: saturate(.8) contrast(1.1); }
-/* Fix #15: corridor image removed to avoid ~3MB wasted fetch; element kept for future activation */
-.scene__image--corridor { opacity: 0; }
 .scene--active .scene__image--exterior { opacity: 0; transform: scale(1.08); }
 .scene--active .scene__image--interior { opacity: 1; transform: scale(1.02); }
 
@@ -49,13 +47,9 @@ button { color: inherit; }
 .scene__light--two { width: 22vw; height: 22vw; background: #d17a29; right: -5%; bottom: 3%; animation-delay: -2s; }
 .scene__smoke { position: absolute; width: 55vw; height: 30vh; left: 10%; top: 34%; border-radius: 50%; background: rgba(218, 192, 157, .06); filter: blur(28px); opacity: 0; animation: drift 14s ease-in-out infinite; }
 .scene--active .scene__smoke { opacity: 1; }
-/* Fix #6: explicit modifier rules so JSX class names match CSS */
-.scene__smoke--one { /* inherits base position: left 10%, top 34% */ }
 .scene__smoke--two { left: 45%; top: 18%; animation-delay: -6s; }
 
 .fan { position: absolute; width: 80px; height: 80px; top: 8%; left: 55%; opacity: 0; animation: fanFloat 8s ease-in-out infinite; }
-/* Fix #7: explicit modifier rules so JSX class names match CSS */
-.fan--one { /* inherits base position: left 55%, top 8% */ }
 .scene--active .fan { opacity: .18; }
 /* Fix #23b: use CSS scale property (not transform) so fanFloat animation is not overridden */
 .fan--two { left: 77%; top: 16%; scale: .65; }
@@ -128,16 +122,7 @@ button { color: inherit; }
 }
 .status--active .status__dot { animation: blink 1.8s ease-in-out infinite; }
 
-.center-copy { position: absolute; z-index: 4; left: 50%; top: 47%; transform: translate(-50%, -50%); text-align: center; width: min(600px, 84vw); text-shadow: 0 3px 30px rgba(0,0,0,.95); transition: opacity 1.2s ease, transform 1.2s ease; }
-.experience--active .center-copy { opacity: .12; transform: translate(-50%, -50%) scale(.96); pointer-events: none; }
-.eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .3em; color: #d7ae75; margin-bottom: 20px; }
-.center-copy p { margin: 3px 0; font-size: clamp(22px, 3vw, 40px); font-style: italic; font-weight: 400; }
 
-.enter { position: absolute; z-index: 6; left: 50%; bottom: clamp(62px, 10vh, 108px); transform: translateX(-50%); border: 0; background: none; display: flex; align-items: center; gap: 18px; padding: 14px 8px; cursor: pointer; letter-spacing: .25em; font-family: 'DM Mono', monospace; font-size: 12px; }
-.enter__line { width: clamp(34px, 6vw, 90px); height: 1px; background: rgba(239,216,184,.55); transition: width .5s ease, background .5s ease; }
-.enter:hover .enter__line, .enter:focus-visible .enter__line { width: clamp(50px, 8vw, 120px); background: var(--amber); }
-.enter:focus-visible { outline: 1px solid rgba(229,160,82,.8); outline-offset: 8px; }
-.enter__text { text-shadow: 0 2px 12px #000; }
 
 /* ── Music player (Centered Cinematic Dock) ──────────────────── */
 .player {
