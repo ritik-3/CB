@@ -72,16 +72,60 @@ button { color: inherit; }
 .curtain--left { left: -8vw; transform: skewX(7deg); }
 .curtain--right { right: -8vw; transform: skewX(-7deg); }
 
-.topbar { position: absolute; inset: 0 0 auto; display: flex; align-items: flex-start; justify-content: space-between; padding: clamp(24px, 4vw, 52px); z-index: 5; }
-.brand { display: grid; line-height: .76; text-shadow: 0 3px 22px rgba(0,0,0,.8); }
-.brand__small { font-family: 'DM Mono', monospace; letter-spacing: .45em; font-size: 10px; color: var(--muted); margin-left: 4px; }
-.brand__name { font-size: clamp(38px, 5.2vw, 74px); font-weight: 600; letter-spacing: .03em; }
-.brand__bar { font-size: clamp(19px, 2.2vw, 30px); letter-spacing: .35em; margin-left: .15em; color: #d8b17e; }
-.clock { display: grid; gap: 4px; text-align: right; font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: .05em; text-shadow: 0 2px 15px #000; }
-.clock__label { color: var(--muted); font-size: 9px; letter-spacing: .18em; }
-.status-wrap { position: absolute; left: clamp(24px, 4vw, 52px); bottom: clamp(160px, 21vh, 220px); z-index: 5; }
-.status { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .15em; color: #cdbb9f; opacity: .75; }
-.status__dot { width: 6px; height: 6px; border-radius: 50%; background: #9d6f52; box-shadow: 0 0 14px #d98544; }
+/* ── Top bar — floats over scene, no background ───────────────── */
+.topbar {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(22px, 3.5vw, 48px) clamp(24px, 4vw, 52px);
+  z-index: 5;
+}
+
+/* Atmospheric clock — left */
+.atmo-clock {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-shadow: 0 2px 28px rgba(0,0,0,.98), 0 0 50px rgba(0,0,0,.7);
+}
+.atmo-clock__time {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(22px, 2.8vw, 40px);
+  font-weight: 400;
+  color: #d9a05a;
+  letter-spacing: .02em;
+  line-height: 1;
+}
+.atmo-clock__loc {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(8px, 0.85vw, 10px);
+  letter-spacing: .3em;
+  color: #7a6a52;
+  text-transform: uppercase;
+}
+
+/* Status indicator — right side of topbar */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .15em;
+  color: #b8a68c;
+  opacity: .8;
+  text-shadow: 0 2px 20px rgba(0,0,0,.95);
+}
+.status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9d6f52;
+  box-shadow: 0 0 10px #d98544, 0 0 20px rgba(217,133,68,.4);
+  flex-shrink: 0;
+}
 .status--active .status__dot { animation: blink 1.8s ease-in-out infinite; }
 
 .center-copy { position: absolute; z-index: 4; left: 50%; top: 47%; transform: translate(-50%, -50%); text-align: center; width: min(600px, 84vw); text-shadow: 0 3px 30px rgba(0,0,0,.95); transition: opacity 1.2s ease, transform 1.2s ease; }
@@ -95,23 +139,407 @@ button { color: inherit; }
 .enter:focus-visible { outline: 1px solid rgba(229,160,82,.8); outline-offset: 8px; }
 .enter__text { text-shadow: 0 2px 12px #000; }
 
-.player { position: absolute; z-index: 7; left: clamp(24px, 4vw, 52px); right: clamp(24px, 4vw, 52px); bottom: 28px; display: grid; grid-template-columns: 1fr auto; gap: 22px 30px; align-items: end; opacity: 0; transform: translateY(20px); pointer-events: none; transition: opacity .9s ease .2s, transform .9s ease .2s; }
-.player--visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.player__meta { display: grid; gap: 3px; min-width: 0; }
-.player__label { font-family: 'DM Mono', monospace; color: #c9ad88; font-size: 8px; letter-spacing: .2em; }
-.player__meta strong { font-size: clamp(20px, 2vw, 27px); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.player__meta > span:last-child { font-size: 14px; color: #bca78d; }
-.player__controls { display: flex; gap: 8px; }
-.player__controls button { width: 40px; height: 40px; border: 1px solid rgba(235,214,182,.35); border-radius: 50%; background: rgba(17,9,7,.28); cursor: pointer; transition: transform .2s ease, background .2s ease, border-color .2s ease; }
-.player__controls button:hover, .player__controls button:focus-visible { transform: translateY(-2px); background: rgba(102,28,30,.6); border-color: rgba(235,214,182,.75); outline: none; }
-.player__play { font-size: 12px; }
-.player__progress { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; font: 9px 'DM Mono', monospace; color: #aa967e; }
-.player__progress input { width: 100%; accent-color: #c68c51; }
+/* ── Music player (Centered Cinematic Dock) ──────────────────── */
+.player {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: clamp(28px, 4.5vh, 48px);
+  transform: translateX(-50%) translateY(24px);
+  width: clamp(450px, 46vw, 620px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.95), 0 4px 40px rgba(0, 0, 0, 0.85);
+  box-sizing: border-box;
+}
+
+.player--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+/* ── Row 1 & 2: Title & Artist Header ── */
+.player__header {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.player__title-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+}
+
+/* Amber filament live dot */
+.player__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #f0a04b;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px #f39c12, 0 0 16px rgba(243, 156, 18, 0.8), 0 0 28px rgba(230, 126, 34, 0.5);
+  animation: bulbGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes bulbGlow {
+  0%, 100% {
+    opacity: 0.85;
+    transform: scale(1);
+    box-shadow: 0 0 8px #f39c12, 0 0 16px rgba(243, 156, 18, 0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+    box-shadow: 0 0 12px #f39c12, 0 0 24px rgba(243, 156, 18, 0.95), 0 0 35px rgba(230, 126, 34, 0.65);
+  }
+}
+
+/* Upright elegant serif track title */
+.player__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 500;
+  font-style: normal;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 25px rgba(255, 255, 255, 0.25);
+}
+
+/* Spaced uppercase monospace artist name */
+.player__artist {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 3px 0 0 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.95);
+}
+
+/* ── Row 3: Progress Rail & Timestamp ── */
+.player__progress-area {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.player__slider-wrap {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.player__track-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #e67e22, #f5a65b, #ffd7a0);
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(243, 156, 18, 0.9), 0 0 22px rgba(230, 126, 34, 0.5);
+  pointer-events: none;
+  transition: width 0.15s linear;
+}
+
+.player__seek-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+  z-index: 2;
+}
+
+.player__seek-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ffd19a;
+  box-shadow: 0 0 8px #f39c12, 0 0 16px rgba(243, 156, 18, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.player__seek-input::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ffd19a;
+  box-shadow: 0 0 8px #f39c12, 0 0 16px rgba(243, 156, 18, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
+.player__seek-input:hover::-webkit-slider-thumb {
+  transform: scale(1.25);
+}
+
+.player__time {
+  align-self: flex-end;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.88);
+  margin-top: 1px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.95);
+}
+
+/* ── Row 4: Controls Dock (Transport + Volume) ── */
+.player__controls-dock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.player__transport {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+/* Button styles matching warm gold aesthetic with 44px min touch target */
+.player__btn {
+  border: 0;
+  background: none;
+  padding: 8px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  transition: color 0.2s ease, transform 0.15s ease, filter 0.2s ease;
+}
+
+.player__btn:hover,
+.player__btn:focus-visible {
+  color: #ffffff;
+  transform: scale(1.14);
+  filter: drop-shadow(0 0 10px rgba(243, 156, 18, 0.85));
+  outline: none;
+}
+
+.player__btn:active {
+  transform: scale(0.92);
+}
+
+.player__btn--play svg {
+  filter: drop-shadow(0 0 6px rgba(243, 156, 18, 0.4));
+}
+
+/* Volume Control — Always Visible */
+.player__volume-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player__vol-slider-box {
+  width: 72px;
+  opacity: 1;
+  display: flex;
+  align-items: center;
+}
+
+.player__vol-input {
+  width: 100%;
+  height: 3px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(
+    to right,
+    rgba(243, 156, 18, 0.95) 0%,
+    rgba(243, 156, 18, 0.95) var(--vol-percent, 40%),
+    rgba(255, 255, 255, 0.35) var(--vol-percent, 40%),
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.player__vol-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #ffd19a;
+  box-shadow: 0 0 8px #f39c12, 0 0 14px rgba(243, 156, 18, 0.75);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.player__vol-input::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #ffd19a;
+  box-shadow: 0 0 8px #f39c12, 0 0 14px rgba(243, 156, 18, 0.75);
+  border: none;
+  cursor: pointer;
+}
+
+.player__vol-input:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
 
 .location-note { position: absolute; z-index: 4; right: clamp(24px, 4vw, 52px); bottom: clamp(160px, 21vh, 220px); font: 8px 'DM Mono', monospace; letter-spacing: .2em; color: rgba(232,209,178,.48); writing-mode: vertical-rl; transform: rotate(180deg); }
-.grain { position: absolute; inset: -50%; z-index: 10; pointer-events: none; opacity: .11; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E"); animation: grain .18s steps(2) infinite; }
-.vignette { position: absolute; inset: 0; z-index: 9; pointer-events: none; background: radial-gradient(circle at center, transparent 32%, rgba(0,0,0,.4) 74%, rgba(0,0,0,.84) 100%); }
+/* Reduced vignette — was .84 at edges, now .5 so the image breathes */
+.vignette { position: absolute; inset: 0; z-index: 9; pointer-events: none; background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,.28) 72%, rgba(0,0,0,.52) 100%); }
 .warmth { position: absolute; inset: 0; z-index: 8; pointer-events: none; background: linear-gradient(90deg, rgba(62,6,8,.2), transparent 42%, rgba(117,48,13,.13)); mix-blend-mode: color; }
+
+/* ── Atmospheric Entry Prompt (Amber Filament Pill) ────────── */
+.entry-pill {
+  position: absolute;
+  z-index: 15;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: entryPillFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+
+.entry-pill__badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 22px;
+  background: rgba(16, 9, 4, 0.76);
+  border: 1px solid rgba(243, 156, 18, 0.45);
+  border-radius: 999px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 0 24px rgba(243, 156, 18, 0.2), inset 0 1px 1px rgba(255, 230, 190, 0.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: entryPillPulse 3.5s ease-in-out infinite;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Subtly reacts when hovering over the screen */
+.experience:hover .entry-pill__badge {
+  border-color: rgba(243, 156, 18, 0.7);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.9), 0 0 32px rgba(243, 156, 18, 0.35), inset 0 1px 2px rgba(255, 230, 190, 0.28);
+  transform: scale(1.02);
+}
+
+.entry-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffd19a;
+  box-shadow: 0 0 8px #f39c12, 0 0 14px rgba(243, 156, 18, 0.85);
+  animation: bulbGlow 2.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.entry-pill__text {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  color: #ffffff;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+}
+
+.entry-pill__text--touch {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse), (max-width: 600px) {
+  .entry-pill__text--desktop {
+    display: none;
+  }
+  .entry-pill__text--touch {
+    display: inline;
+  }
+}
+
+.entry-pill__divider {
+  color: rgba(243, 156, 18, 0.55);
+  font-size: 11px;
+  user-select: none;
+}
+
+.entry-pill__sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: rgba(240, 220, 190, 0.72);
+  white-space: nowrap;
+}
+
+.entry-pill__audio-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  color: rgba(243, 156, 18, 0.82);
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.95);
+  white-space: nowrap;
+}
+
+@keyframes entryPillFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 14px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes entryPillPulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 20px rgba(243, 156, 18, 0.18), inset 0 1px 1px rgba(255, 230, 190, 0.15);
+    border-color: rgba(243, 156, 18, 0.38);
+  }
+  50% {
+    box-shadow: 0 4px 28px rgba(0, 0, 0, 0.85), 0 0 32px rgba(243, 156, 18, 0.38), inset 0 1px 2px rgba(255, 230, 190, 0.28);
+    border-color: rgba(243, 156, 18, 0.65);
+  }
+}
 
 /* Fix #22: was 480deg (= 1⅓ turns) which caused a visible stutter on each loop; 360deg is seamless */
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -119,83 +547,226 @@ button { color: inherit; }
 @keyframes drift { 0%,100% { transform: translate3d(-6%, 2%, 0) scale(.95); } 50% { transform: translate3d(9%, -4%, 0) scale(1.08); } }
 @keyframes fanFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 @keyframes blink { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
-@keyframes grain { 0% { transform: translate(0,0); } 25% { transform: translate(2%,-1%); } 50% { transform: translate(-1%,2%); } 75% { transform: translate(1%,1%); } 100% { transform: translate(-2%,-2%); } }
 
-/* ── Large desktop / standard desktop ──────────────────────────── */
-@media (max-width: 900px) {
-  .scene__image--exterior { background-position: 58% center; }
-  .scene__image--interior { background-position: 53% center; }
-  .brand__name { font-size: 44px; }
-  .location-note { display: none; }
+/* ── Multi-Device Responsive Media Queries ────────────────────── */
+
+/* ── Large Desktop & Ultrawide (>= 1440px) ────────────────────── */
+@media (min-width: 1440px) {
+  .player {
+    width: clamp(520px, 42vw, 680px);
+    bottom: 48px;
+    gap: 10px;
+  }
+  .player__title {
+    font-size: 42px;
+  }
+  .player__artist {
+    font-size: 12px;
+    margin-left: 26px;
+  }
+  .player__transport {
+    gap: 28px;
+  }
 }
 
-/* ── Fix #16: Tablet breakpoint (768px) ─────────────────────────── */
+/* ── Standard Desktop & Laptop (1024px – 1439px) ──────────────── */
+@media (max-width: 1439px) and (min-width: 1025px) {
+  .player {
+    width: clamp(460px, 46vw, 560px);
+    bottom: 38px;
+  }
+  .player__title {
+    font-size: 36px;
+  }
+}
+
+/* ── Tablet Landscape / Small Laptop (769px – 1024px) ─────────── */
+@media (max-width: 1024px) {
+  .scene__image--exterior { background-position: 58% center; }
+  .scene__image--interior { background-position: 53% center; }
+  .location-note { display: none; }
+  .player {
+    width: clamp(420px, 60vw, 500px);
+    bottom: 32px;
+  }
+  .player__title {
+    font-size: 32px;
+  }
+  .player__artist {
+    font-size: 10px;
+    margin-left: 22px;
+  }
+  .player__transport {
+    gap: 20px;
+  }
+}
+
+/* ── Tablet Portrait (601px – 768px) ──────────────────────────── */
 @media (max-width: 768px) {
   .scene__image--exterior { background-position: 60% center; }
   .scene__image--interior { background-position: 55% center; }
-  .brand__name { font-size: 40px; }
-  .brand__bar { font-size: 17px; }
-  .status-wrap { left: 20px; bottom: 145px; }
-  .player { left: 20px; right: 20px; bottom: 18px; gap: 12px 20px; }
-  .player__meta strong { font-size: 19px; }
-  .location-note { display: none; }
+  .atmo-clock__time { font-size: 26px; }
+  .player {
+    width: clamp(380px, 75vw, 460px);
+    bottom: 28px;
+    gap: 8px;
+  }
+  .player__title {
+    font-size: 28px;
+  }
+  .player__artist {
+    font-size: 10px;
+    margin-left: 22px;
+  }
+  .player__transport {
+    gap: 18px;
+  }
 }
 
-/* ── Mobile portrait ─────────────────────────────────────────────── */
+/* ── Standard Mobile Portrait (391px – 600px) ─────────────────── */
 @media (max-width: 600px) {
   .experience { min-height: 520px; }
-  .topbar { padding: 22px 20px; }
-  .brand__small { font-size: 8px; }
-  .brand__name { font-size: 36px; }
-  .brand__bar { font-size: 16px; }
-  .clock { font-size: 10px; }
-  .center-copy { top: 44%; width: 88vw; }
-  .center-copy p { font-size: 24px; }
-  .status-wrap { left: 20px; bottom: 138px; }
-  .enter { bottom: 70px; font-size: 10px; gap: 12px; }
-  .enter__line { width: 30px; }
-  .player { left: 20px; right: 20px; bottom: 16px; gap: 10px; }
-  .player__meta strong { font-size: 17px; }
-  .player__meta > span:last-child { font-size: 12px; }
-  .player__controls button { width: 34px; height: 34px; }
-  .player__progress { gap: 7px; }
+  .topbar { padding: 20px 20px; }
+  .atmo-clock__time { font-size: 20px; }
+  .atmo-clock__loc { font-size: 8px; letter-spacing: .2em; }
+  .player {
+    width: calc(100vw - 36px);
+    bottom: 24px;
+    gap: 6px;
+  }
+  .player__title-row {
+    gap: 10px;
+  }
+  .player__dot {
+    width: 9px;
+    height: 9px;
+  }
+  .player__title {
+    font-size: 24px;
+  }
+  .player__artist {
+    font-size: 9.5px;
+    margin: 2px 0 0 19px;
+  }
+  .player__time {
+    font-size: 10px;
+  }
+  .player__transport {
+    gap: 14px;
+  }
+  .player__vol-slider-box {
+    display: flex;
+    width: 58px;
+  }
+  .player__volume-wrap {
+    gap: 6px;
+  }
+  .entry-pill {
+    gap: 6px;
+  }
+  .entry-pill__badge {
+    padding: 8px 16px;
+    gap: 8px;
+  }
+  .entry-pill__divider,
+  .entry-pill__sub {
+    display: none;
+  }
+  .entry-pill__text {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+  .entry-pill__audio-hint {
+    font-size: 8px;
+  }
   .fan { display: none; }
   .scene__image--exterior { background-position: 64% center; }
   .scene__image--interior { background-position: 57% center; }
 }
 
-/* ── Fix #17: Small mobile (iPhone SE, 320–390px) ───────────────── */
+/* ── Small Mobile (<= 390px, e.g. iPhone SE) ───────────────────── */
 @media (max-width: 390px) {
-  .topbar { padding: 18px 16px; }
-  .brand__small { font-size: 7px; letter-spacing: .3em; }
-  .brand__name { font-size: 28px; }
-  .brand__bar { font-size: 13px; }
-  .clock { font-size: 9px; }
-  .center-copy { top: 42%; width: 92vw; }
-  .center-copy p { font-size: 18px; }
-  .eyebrow { font-size: 8px; margin-bottom: 14px; }
-  .status-wrap { left: 16px; bottom: 130px; }
-  .enter { bottom: 62px; gap: 10px; font-size: 9px; }
-  .enter__line { width: 24px; }
-  .player { left: 16px; right: 16px; bottom: 12px; }
-  .player__meta strong { font-size: 15px; }
-  .player__controls button { width: 30px; height: 30px; }
+  .topbar { padding: 16px 16px; }
+  .atmo-clock__time { font-size: 17px; }
+  .atmo-clock__loc { font-size: 7px; letter-spacing: .18em; }
+  .status { font-size: 9px; }
+  .player {
+    width: calc(100vw - 24px);
+    bottom: 16px;
+    gap: 5px;
+  }
+  .player__title-row {
+    gap: 8px;
+  }
+  .player__dot {
+    width: 8px;
+    height: 8px;
+  }
+  .player__title {
+    font-size: 20px;
+  }
+  .player__artist {
+    font-size: 8.5px;
+    margin: 2px 0 0 16px;
+  }
+  .player__transport {
+    gap: 8px;
+  }
+  .player__vol-slider-box {
+    display: flex;
+    width: 46px;
+  }
+  .player__volume-wrap {
+    gap: 4px;
+  }
+  .player__btn {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 3px;
+  }
+  .entry-pill__badge {
+    padding: 7px 14px;
+  }
+  .entry-pill__text {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
 }
 
-/* ── Fix #14: Landscape mobile — treated as its own state ───────── */
-@media (max-height: 620px) and (orientation: landscape) {
-  .topbar { padding: 14px 24px; }
-  .brand__name { font-size: 32px; }
-  .brand__bar { font-size: 14px; }
-  .center-copy { top: 42%; }
-  .center-copy p { font-size: 18px; }
-  .status-wrap { left: 24px; bottom: 90px; }
+/* ── Mobile Landscape (height <= 550px) ───────────────────────── */
+@media (max-height: 550px) and (orientation: landscape) {
+  .topbar { padding: 10px 24px; }
+  .atmo-clock__time { font-size: 18px; }
+  .atmo-clock__loc { font-size: 7px; }
   .location-note { display: none; }
-  .enter { bottom: 40px; }
-  .player { bottom: 8px; left: 24px; right: 24px; gap: 8px 16px; }
-  .player__meta strong { font-size: 16px; }
-  .player__controls button { width: 32px; height: 32px; }
-  /* Hide smoke to reduce visual noise in the cramped landscape view */
+  .player {
+    bottom: 8px;
+    width: min(520px, 85vw);
+    gap: 3px;
+  }
+  .player__title {
+    font-size: 20px;
+  }
+  .player__artist {
+    display: none;
+  }
+  .player__progress-area {
+    margin-top: 2px;
+  }
+  .player__controls-dock {
+    margin-top: 2px;
+  }
+  .player__btn {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 4px;
+  }
+  .entry-pill {
+    gap: 4px;
+  }
+  .entry-pill__badge {
+    padding: 6px 14px;
+  }
   .scene__smoke { display: none; }
 }
 

@@ -11,11 +11,11 @@ build/
 *.local
 
 # ── Environment variables ─────────────────────────────────────────────────────
-.env
+# .env          → committed (non-secret config like playlist IDs)
+# .env.local    → gitignored (personal overrides / actual secrets)
 .env.local
+.env
 .env.*.local
-.env.development
-.env.production
 
 # ── Editor & OS junk ──────────────────────────────────────────────────────────
 .DS_Store
@@ -52,3 +52,4 @@ coverage/
 
 # ── Misc ─────────────────────────────────────────────────────────────────────
 *.tsbuildinfo
+.env.example
