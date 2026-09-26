@@ -12,8 +12,9 @@
 }
 
 * { box-sizing: border-box; }
-html, body, #root { width: 100%; min-height: 100%; margin: 0; }
-body { overflow: hidden; background: #090706; }
+/* Fix #13: height:100% on html+body is more reliable than min-height on iOS Safari */
+html, body, #root { width: 100%; height: 100%; margin: 0; }
+body { overflow: hidden; overscroll-behavior: none; background: #090706; }
 button, input { font: inherit; }
 button { color: inherit; }
 
@@ -37,7 +38,8 @@ button { color: inherit; }
 }
 .scene__image--exterior { background-image: url('/assets/reference-1.png'); opacity: .96; transform: scale(1.02); }
 .scene__image--interior { background-image: url('/assets/reference-2.png'); opacity: 0; transform: scale(1.07); filter: saturate(.8) contrast(1.1); }
-.scene__image--corridor { background-image: url('/assets/reference-3.png'); opacity: 0; }
+/* Fix #15: corridor image removed to avoid ~3MB wasted fetch; element kept for future activation */
+.scene__image--corridor { opacity: 0; }
 .scene--active .scene__image--exterior { opacity: 0; transform: scale(1.08); }
 .scene--active .scene__image--interior { opacity: 1; transform: scale(1.02); }
 
@@ -47,13 +49,21 @@ button { color: inherit; }
 .scene__light--two { width: 22vw; height: 22vw; background: #d17a29; right: -5%; bottom: 3%; animation-delay: -2s; }
 .scene__smoke { position: absolute; width: 55vw; height: 30vh; left: 10%; top: 34%; border-radius: 50%; background: rgba(218, 192, 157, .06); filter: blur(28px); opacity: 0; animation: drift 14s ease-in-out infinite; }
 .scene--active .scene__smoke { opacity: 1; }
+/* Fix #6: explicit modifier rules so JSX class names match CSS */
+.scene__smoke--one { /* inherits base position: left 10%, top 34% */ }
 .scene__smoke--two { left: 45%; top: 18%; animation-delay: -6s; }
 
 .fan { position: absolute; width: 80px; height: 80px; top: 8%; left: 55%; opacity: 0; animation: fanFloat 8s ease-in-out infinite; }
+/* Fix #7: explicit modifier rules so JSX class names match CSS */
+.fan--one { /* inherits base position: left 55%, top 8% */ }
 .scene--active .fan { opacity: .18; }
-.fan--two { left: 77%; top: 16%; transform: scale(.65); }
-.fan::before { content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #d4a56b; left: 35px; top: 35px; z-index: 2; }
-.fan span { position: absolute; width: 9px; height: 38px; left: 36px; top: 4px; border-radius: 70% 70% 20% 20%; background: #2b1b14; transform-origin: 50% 36px; animation: spin 3.8s linear infinite; }
+/* Fix #23b: use CSS scale property (not transform) so fanFloat animation is not overridden */
+.fan--two { left: 77%; top: 16%; scale: .65; }
+/* Fix #23: spin animation moved to .fan__blades wrapper — blades rotate as a unit.
+   Blade spans keep their static transform: rotate(120/240deg) offsets since no animation overrides them. */
+.fan__blades { position: absolute; inset: 0; animation: spin 3.8s linear infinite; }
+.fan::before { content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #d4a56b; left: 35px; top: 35px; z-index: 3; }
+.fan span { position: absolute; width: 9px; height: 38px; left: 36px; top: 4px; border-radius: 70% 70% 20% 20%; background: #2b1b14; transform-origin: 50% 36px; }
 .fan span:nth-child(2) { transform: rotate(120deg); }
 .fan span:nth-child(3) { transform: rotate(240deg); }
 
@@ -103,13 +113,15 @@ button { color: inherit; }
 .vignette { position: absolute; inset: 0; z-index: 9; pointer-events: none; background: radial-gradient(circle at center, transparent 32%, rgba(0,0,0,.4) 74%, rgba(0,0,0,.84) 100%); }
 .warmth { position: absolute; inset: 0; z-index: 8; pointer-events: none; background: linear-gradient(90deg, rgba(62,6,8,.2), transparent 42%, rgba(117,48,13,.13)); mix-blend-mode: color; }
 
-@keyframes spin { to { transform: rotate(480deg); } }
+/* Fix #22: was 480deg (= 1⅓ turns) which caused a visible stutter on each loop; 360deg is seamless */
+@keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 0%,100% { opacity: .12; transform: scale(.95); } 50% { opacity: .25; transform: scale(1.05); } }
 @keyframes drift { 0%,100% { transform: translate3d(-6%, 2%, 0) scale(.95); } 50% { transform: translate3d(9%, -4%, 0) scale(1.08); } }
 @keyframes fanFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 @keyframes blink { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
 @keyframes grain { 0% { transform: translate(0,0); } 25% { transform: translate(2%,-1%); } 50% { transform: translate(-1%,2%); } 75% { transform: translate(1%,1%); } 100% { transform: translate(-2%,-2%); } }
 
+/* ── Large desktop / standard desktop ──────────────────────────── */
 @media (max-width: 900px) {
   .scene__image--exterior { background-position: 58% center; }
   .scene__image--interior { background-position: 53% center; }
@@ -117,6 +129,19 @@ button { color: inherit; }
   .location-note { display: none; }
 }
 
+/* ── Fix #16: Tablet breakpoint (768px) ─────────────────────────── */
+@media (max-width: 768px) {
+  .scene__image--exterior { background-position: 60% center; }
+  .scene__image--interior { background-position: 55% center; }
+  .brand__name { font-size: 40px; }
+  .brand__bar { font-size: 17px; }
+  .status-wrap { left: 20px; bottom: 145px; }
+  .player { left: 20px; right: 20px; bottom: 18px; gap: 12px 20px; }
+  .player__meta strong { font-size: 19px; }
+  .location-note { display: none; }
+}
+
+/* ── Mobile portrait ─────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .experience { min-height: 520px; }
   .topbar { padding: 22px 20px; }
@@ -139,14 +164,39 @@ button { color: inherit; }
   .scene__image--interior { background-position: 57% center; }
 }
 
+/* ── Fix #17: Small mobile (iPhone SE, 320–390px) ───────────────── */
+@media (max-width: 390px) {
+  .topbar { padding: 18px 16px; }
+  .brand__small { font-size: 7px; letter-spacing: .3em; }
+  .brand__name { font-size: 28px; }
+  .brand__bar { font-size: 13px; }
+  .clock { font-size: 9px; }
+  .center-copy { top: 42%; width: 92vw; }
+  .center-copy p { font-size: 18px; }
+  .eyebrow { font-size: 8px; margin-bottom: 14px; }
+  .status-wrap { left: 16px; bottom: 130px; }
+  .enter { bottom: 62px; gap: 10px; font-size: 9px; }
+  .enter__line { width: 24px; }
+  .player { left: 16px; right: 16px; bottom: 12px; }
+  .player__meta strong { font-size: 15px; }
+  .player__controls button { width: 30px; height: 30px; }
+}
+
+/* ── Fix #14: Landscape mobile — treated as its own state ───────── */
 @media (max-height: 620px) and (orientation: landscape) {
-  .topbar { padding: 18px 26px; }
-  .brand__name { font-size: 36px; }
-  .center-copy { top: 43%; }
-  .center-copy p { font-size: 20px; }
-  .status-wrap, .location-note { bottom: 105px; }
-  .enter { bottom: 45px; }
-  .player { bottom: 10px; }
+  .topbar { padding: 14px 24px; }
+  .brand__name { font-size: 32px; }
+  .brand__bar { font-size: 14px; }
+  .center-copy { top: 42%; }
+  .center-copy p { font-size: 18px; }
+  .status-wrap { left: 24px; bottom: 90px; }
+  .location-note { display: none; }
+  .enter { bottom: 40px; }
+  .player { bottom: 8px; left: 24px; right: 24px; gap: 8px 16px; }
+  .player__meta strong { font-size: 16px; }
+  .player__controls button { width: 32px; height: 32px; }
+  /* Hide smoke to reduce visual noise in the cramped landscape view */
+  .scene__smoke { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
