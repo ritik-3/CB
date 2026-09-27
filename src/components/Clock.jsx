@@ -10,12 +10,13 @@ export default function Clock() {
 
   const h = now.getHours() % 12 || 12
   const m = now.getMinutes().toString().padStart(2, '0')
-  const ampm = now.getHours() >= 12 ? 'pm' : 'am'
+  const ampm = now.getHours() >= 12 ? 'PM' : 'AM'
 
   return (
     <time className="atmo-clock" dateTime={now.toISOString()}>
       <span className="atmo-clock__time">{h}:{m} {ampm}</span>
-      <span className="atmo-clock__loc">Mumbai &middot; 1998</span>
+      <div className="atmo-clock__line" aria-hidden="true" />
+      <span className="atmo-clock__loc">MUMBAI &middot; 1998</span>
     </time>
   )
 }

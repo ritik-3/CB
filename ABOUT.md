@@ -31,10 +31,13 @@ The project draws inspiration from the 2001 Bollywood film *Chandni Bar* and the
 chandni-bar/
 │
 ├── public/
-│   └── assets/
-│       ├── reference-1.png        # Exterior scene image
-│       ├── reference-2.png        # Interior scene image
-│       └── reference-3.png        # Additional reference
+│   ├── assets/
+│   │   ├── reference-1.png        # Exterior scene image
+│   │   ├── reference-2.png        # Interior scene image
+│   │   ├── reference-3.png        # Additional reference
+│   │   └── Enter Bar Sign.png     # Vintage brass entrance plaque
+│   └── audio/
+│       └── traffic-in-city.mp3    # Scene 1 Mumbai city street ambiance
 │
 ├── src/
 │   ├── main.jsx                   # React entry point
@@ -64,7 +67,7 @@ Page Load
     ▼
 ┌─────────────────────────────────────┐
 │   Exterior View (reference-1.png)   │
-│   + Entry Pill: "CLICK TO ENTER"    │
+│   + Plaque: "अंदर आइए · ENTER BAR"  │
 │   + Clock: "7:30 pm · Mumbai · 1998"│
 │   + Status: "DOOR OPEN"             │
 └─────────────────────────────────────┘

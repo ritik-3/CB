@@ -6,8 +6,11 @@ export default function Status({ active }) {
 
   return (
     <div className={`status ${active ? 'status--active' : ''}`}>
-      <span className="status__dot" />
-      {active ? `${count} INSIDE` : 'DOOR OPEN'}
+      <span className="status__dot" aria-hidden="true" />
+      <div className="status__info">
+        <span className="status__door">{active ? 'DOOR SHUT' : 'DOOR OPEN'}</span>
+        <span className="status__count">{active ? `${count + 1} INSIDE` : `${count} INSIDE`}</span>
+      </div>
     </div>
   )
 }

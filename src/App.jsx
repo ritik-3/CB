@@ -51,13 +51,65 @@ export default function App() {
   const [volume,       setVolume]       = useState(YT_VOLUME)
   const [isMuted,      setIsMuted]      = useState(false)
 
-  const ytPlayer    = useRef(null)
-  const pollRef     = useRef(null)
-  const isPlayingRef = useRef(false)
+  const [ambientPlaying, setAmbientPlaying] = useState(false)
 
-  const isEnteredRef = useRef(false)
+  const ytPlayer       = useRef(null)
+  const pollRef        = useRef(null)
+  const isPlayingRef   = useRef(false)
+  const isEnteredRef   = useRef(false)
+  const streetAudioRef = useRef(null)
 
   useEffect(() => { isPlayingRef.current = isPlaying }, [isPlaying])
+
+  // ── Scene 1 Ambient Sound: Mumbai City Traffic ─────────────────────────────
+  const startStreetSound = useCallback(() => {
+    if (!streetAudioRef.current) {
+      const audio = new Audio('/audio/traffic-in-city.mp3')
+      audio.loop = true
+      audio.volume = 0.65
+      streetAudioRef.current = audio
+    }
+    const audio = streetAudioRef.current
+    if (audio.paused) {
+      audio.play()
+        .then(() => setAmbientPlaying(true))
+        .catch((err) => console.log('Autoplay deferred:', err.message))
+    }
+  }, [])
+
+  const toggleStreetSound = useCallback((e) => {
+    e?.stopPropagation()
+    if (!streetAudioRef.current) {
+      startStreetSound()
+      return
+    }
+    const audio = streetAudioRef.current
+    if (audio.paused) {
+      audio.play().then(() => setAmbientPlaying(true)).catch(() => {})
+    } else {
+      audio.pause()
+      setAmbientPlaying(false)
+    }
+  }, [startStreetSound])
+
+  useEffect(() => {
+    // Attempt play on initial mount
+    startStreetSound()
+
+    // Unlock and play on very first user interaction anywhere on the page
+    const handleGesture = () => {
+      if (!isEnteredRef.current) {
+        startStreetSound()
+      }
+    }
+    window.addEventListener('pointerdown', handleGesture, { once: true })
+    window.addEventListener('keydown', handleGesture, { once: true })
+
+    return () => {
+      window.removeEventListener('pointerdown', handleGesture)
+      window.removeEventListener('keydown', handleGesture)
+    }
+  }, [startStreetSound])
 
   // ── Metadata ────────────────────────────────────────────────────────────────
   const updateTrackMeta = useCallback(() => {
@@ -173,9 +225,25 @@ export default function App() {
   }, [updateTrackMeta, startPolling, stopPolling, playRandomInitialTrack])
 
   // ── Controls ────────────────────────────────────────────────────────────────
-  const enterBar = () => {
+  const enterBar = (e) => {
+    e?.stopPropagation()
     setIsEntered(true)
     isEnteredRef.current = true
+
+    // Smoothly fade out the exterior street traffic ambiance as we step inside
+    if (streetAudioRef.current) {
+      const audio = streetAudioRef.current
+      const fadeStep = 0.05
+      const fadeInterval = setInterval(() => {
+        if (audio.volume > fadeStep) {
+          audio.volume = Math.max(0, audio.volume - fadeStep)
+        } else {
+          audio.pause()
+          clearInterval(fadeInterval)
+        }
+      }, 50)
+    }
+
     if (ytPlayer.current && playerReady) {
       playRandomInitialTrack()
     } else if (ytPlayer.current) {
@@ -232,8 +300,7 @@ export default function App() {
   return (
     <main
       className={experienceClass}
-      onClick={!isEntered ? enterBar : undefined}
-      style={!isEntered ? { cursor: 'pointer' } : undefined}
+      onClick={!isEntered ? startStreetSound : undefined}
     >
       {/* Hidden 1×1 YouTube player — off screen, no visual */}
       <div
@@ -245,28 +312,40 @@ export default function App() {
       <Scene active={isEntered} />
 
       <div className="vignette" aria-hidden="true" />
-      <div className="warmth"   aria-hidden="true" />
 
       <header className="topbar">
         <Clock />
         <Status active={isEntered} />
       </header>
 
-      {/* Atmospheric Entry Prompt — Amber Filament Pill */}
+      {/* Atmospheric Entrance Plaque & Ambient Street Audio Control */}
       {!isEntered && (
-        <div className="entry-pill" aria-label="Click anywhere to enter">
-          <div className="entry-pill__badge">
-            <span className="entry-pill__dot" aria-hidden="true" />
-            <span className="entry-pill__text">
-              <span className="entry-pill__text--desktop">CLICK ANYWHERE TO ENTER</span>
-              <span className="entry-pill__text--touch">TAP ANYWHERE TO ENTER</span>
-            </span>
-            <span className="entry-pill__divider" aria-hidden="true">·</span>
-            <span className="entry-pill__sub">1998 MUMBAI</span>
-          </div>
-          <span className="entry-pill__audio-hint">
-            ♫ BEST EXPERIENCED WITH SOUND
-          </span>
+        <div className="enter-sign-wrap">
+          <button
+            type="button"
+            className="enter-sign-btn"
+            onClick={enterBar}
+            aria-label="अंदर आइए — Enter Chandni Bar"
+          >
+            <img
+              src="/assets/Enter%20Bar%20Sign.png"
+              alt="अंदर आइए — ENTER BAR"
+              className="enter-sign-btn__img"
+              draggable="false"
+            />
+          </button>
+
+          <button
+            type="button"
+            className={`ambient-sound-btn ${ambientPlaying ? 'ambient-sound-btn--active' : ''}`}
+            onClick={toggleStreetSound}
+            aria-label={ambientPlaying ? 'Mute city street ambience' : 'Play city street ambience'}
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+              <path d="M12 3a9 9 0 0 0-9 9v7a3 3 0 0 0 3 3h1a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5v-1a7 7 0 0 1 14 0v1h-2a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h1a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9z"/>
+            </svg>
+            <span>{ambientPlaying ? 'STREET SOUND: PLAYING' : 'TAP FOR AMBIENT SOUND'}</span>
+          </button>
         </div>
       )}
 
@@ -286,8 +365,6 @@ export default function App() {
         onVolumeChange={handleVolumeChange}
         onToggleMute={handleToggleMute}
       />
-
-      <div className="location-note">FORT · LOWER PAREL · AFTER MIDNIGHT</div>
     </main>
   )
 }
